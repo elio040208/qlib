@@ -1,0 +1,149 @@
+qlib:
+  provider_uri: "~/.qlib/qlib_data/cn_data"
+  region: "cn"
+
+universe:
+  market: "csi300"
+  benchmark: "SH000300"
+  freq: "day"
+
+periods:
+  train: ["2010-01-01", "2016-12-31"]
+  valid: ["2017-01-01", "2018-12-31"]
+  test: ["2019-01-01", "2020-08-01"]
+
+label:
+  name: "LABEL0"
+  expression: "Ref($close, -2) / Ref($close, -1) - 1"
+
+evaluation:
+  quantile: 0.2
+  ann_scaler: 252
+  direction_policy: "train_ic"
+  selection_segment: "valid"
+  top_n: 10
+  min_coverage: 0.7
+
+output:
+  dir: "/tmp/qlib_alpha_factor_mining"
+
+factors:
+  - name: "KMID"
+    category: "kbar"
+    expression: "($close - $open) / $open"
+    hypothesis: "Intraday candle body strength."
+
+  - name: "KLEN"
+    category: "kbar"
+    expression: "($high - $low) / $open"
+    hypothesis: "Intraday price range."
+
+  - name: "KUP"
+    category: "kbar"
+    expression: "($high - Greater($open, $close)) / $open"
+    hypothesis: "Upper shadow pressure."
+
+  - name: "KLOW"
+    category: "kbar"
+    expression: "(Less($open, $close) - $low) / $open"
+    hypothesis: "Lower shadow support."
+
+  - name: "ROC5"
+    category: "momentum"
+    expression: "Ref($close, 5) / $close"
+    hypothesis: "Five-day reversal or momentum depending on learned direction."
+
+  - name: "ROC20"
+    category: "momentum"
+    expression: "Ref($close, 20) / $close"
+    hypothesis: "Twenty-day reversal or momentum depending on learned direction."
+
+  - name: "MA5"
+    category: "trend"
+    expression: "Mean($close, 5) / $close"
+    hypothesis: "Deviation from the five-day moving average."
+
+  - name: "MA20"
+    category: "trend"
+    expression: "Mean($close, 20) / $close"
+    hypothesis: "Deviation from the twenty-day moving average."
+
+  - name: "BETA20"
+    category: "trend"
+    expression: "Slope($close, 20) / $close"
+    hypothesis: "Linear trend slope over the past twenty days."
+
+  - name: "RSQR20"
+    category: "trend"
+    expression: "Rsquare($close, 20)"
+    hypothesis: "Linearity of the recent trend."
+
+  - name: "RESI20"
+    category: "reversal"
+    expression: "Resi($close, 20) / $close"
+    hypothesis: "Residual from the recent linear trend."
+
+  - name: "STD20"
+    category: "risk"
+    expression: "Std($close, 20) / $close"
+    hypothesis: "Twenty-day price volatility."
+
+  - name: "RSV20"
+    category: "position"
+    expression: "($close - Min($low, 20)) / (Max($high, 20) - Min($low, 20) + 1e-12)"
+    hypothesis: "Close location inside the twenty-day high-low range."
+
+  - name: "RANK20"
+    category: "position"
+    expression: "Rank($close, 20)"
+    hypothesis: "Time-series percentile rank of the current close."
+
+  - name: "IMAX20"
+    category: "position"
+    expression: "IdxMax($high, 20) / 20"
+    hypothesis: "Recency of the latest twenty-day high."
+
+  - name: "IMIN20"
+    category: "position"
+    expression: "IdxMin($low, 20) / 20"
+    hypothesis: "Recency of the latest twenty-day low."
+
+  - name: "CORR20"
+    category: "price_volume"
+    expression: "Corr($close, Log($volume + 1), 20)"
+    hypothesis: "Correlation between price level and traded volume."
+
+  - name: "CORD20"
+    category: "price_volume"
+    expression: "Corr($close / Ref($close, 1), Log($volume / Ref($volume, 1) + 1), 20)"
+    hypothesis: "Correlation between return and volume change."
+
+  - name: "VMA20"
+    category: "volume"
+    expression: "Mean($volume, 20) / ($volume + 1e-12)"
+    hypothesis: "Current volume relative to the twenty-day average volume."
+
+  - name: "VSTD20"
+    category: "volume"
+    expression: "Std($volume, 20) / ($volume + 1e-12)"
+    hypothesis: "Twenty-day volume volatility."
+
+  - name: "WVMA20"
+    category: "price_volume"
+    expression: "Std(Abs($close / Ref($close, 1) - 1) * $volume, 20) / (Mean(Abs($close / Ref($close, 1) - 1) * $volume, 20) + 1e-12)"
+    hypothesis: "Volume-weighted return volatility."
+
+  - name: "SUMD20"
+    category: "momentum"
+    expression: "(Sum(Greater($close - Ref($close, 1), 0), 20) - Sum(Greater(Ref($close, 1) - $close, 0), 20)) / (Sum(Abs($close - Ref($close, 1)), 20) + 1e-12)"
+    hypothesis: "RSI-style balance between recent gains and losses."
+
+  - name: "VSUMD20"
+    category: "volume"
+    expression: "(Sum(Greater($volume - Ref($volume, 1), 0), 20) - Sum(Greater(Ref($volume, 1) - $volume, 0), 20)) / (Sum(Abs($volume - Ref($volume, 1)), 20) + 1e-12)"
+    hypothesis: "RSI-style balance between recent volume increases and decreases."
+
+  - name: "MACD"
+    category: "trend"
+    expression: "2 * ((EMA($close, 12) - EMA($close, 26)) / $close - EMA((EMA($close, 12) - EMA($close, 26)) / $close, 9))"
+    hypothesis: "Moving-average convergence divergence normalized by close."
