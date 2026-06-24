@@ -18,6 +18,9 @@ Outputs are written to `/tmp/qlib_alpha_factor_mining` by default:
 - `factor_daily_metrics.csv`: daily IC, Rank IC, and long-short return.
 - `report.md`: selected factors and the evaluation method.
 
+The default split targets recent data available in the local community CN dataset:
+train from 2021 through 2023, validation in 2024, and test from 2025 through 2026-03-30.
+
 Use another output directory with:
 
 ```bash
