@@ -4,6 +4,9 @@ This example turns Qlib into a lightweight, explainable formulaic alpha research
 It is model-free by default: each factor is a readable Qlib expression, and selection is
 based on single-factor IC, Rank IC, long-short return, coverage, and score stability.
 
+See `EXPLANATION.md` for the Chinese research notes, metric interpretation, and the
+latest local-data result summary.
+
 ## Run
 
 Make sure Qlib daily data exists at `~/.qlib/qlib_data/cn_data`, then run:
